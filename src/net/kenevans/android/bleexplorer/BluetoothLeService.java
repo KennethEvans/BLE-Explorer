@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.kenevans.android.hxmbleexplorer;
+package net.kenevans.android.bleexplorer;
 
 import java.util.List;
 import java.util.UUID;
@@ -53,11 +53,11 @@ public class BluetoothLeService extends Service {
 	// private static final int STATE_CONNECTING = 1;
 	// private static final int STATE_CONNECTED = 2;
 
-	public final static String ACTION_GATT_CONNECTED = "net.kenevans.android.hxmbleexplorer.ACTION_GATT_CONNECTED";
-	public final static String ACTION_GATT_DISCONNECTED = "net.kenevans.android.hxmbleexplorer.ACTION_GATT_DISCONNECTED";
-	public final static String ACTION_GATT_SERVICES_DISCOVERED = "net.kenevans.android.hxmbleexplorer.ACTION_GATT_SERVICES_DISCOVERED";
-	public final static String ACTION_DATA_AVAILABLE = "net.kenevans.android.hxmbleexplorer.ACTION_DATA_AVAILABLE";
-	public final static String EXTRA_DATA = "net.kenevans.android.hxmbleexplorer.EXTRA_DATA";
+	public final static String ACTION_GATT_CONNECTED = "net.kenevans.android.bleexplorer.ACTION_GATT_CONNECTED";
+	public final static String ACTION_GATT_DISCONNECTED = "net.kenevans.android.bleexplorer.ACTION_GATT_DISCONNECTED";
+	public final static String ACTION_GATT_SERVICES_DISCOVERED = "net.kenevans.android.bleexplorer.ACTION_GATT_SERVICES_DISCOVERED";
+	public final static String ACTION_DATA_AVAILABLE = "net.kenevans.android.bleexplorer.ACTION_DATA_AVAILABLE";
+	public final static String EXTRA_DATA = "net.kenevans.android.bleexplorer.EXTRA_DATA";
 
 	public final static UUID UUID_HEART_RATE_MEASUREMENT = UUID
 			.fromString(GattAttributes.HEART_RATE_MEASUREMENT);

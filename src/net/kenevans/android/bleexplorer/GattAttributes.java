@@ -1,4 +1,4 @@
-package net.kenevans.android.hxmbleexplorer;
+package net.kenevans.android.bleexplorer;
 
 import java.util.HashMap;
 

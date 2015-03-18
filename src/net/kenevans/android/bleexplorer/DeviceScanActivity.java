@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.kenevans.android.hxmbleexplorer;
+package net.kenevans.android.bleexplorer;
 
 import java.util.ArrayList;
 
