@@ -5,3 +5,5 @@
 .DS_Store
 build/
 /captures
+projectFilesBackup/.idea/workspace.xml
+.idea/markdown-navigator/profiles_settings.xml
