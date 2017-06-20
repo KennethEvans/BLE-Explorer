@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.kenevans.android.bleexplorer"
-    android:versionCode="2"
-    android:versionName="2.0">
+    package="net.kenevans.android.bleexplorer">
 
-    <uses-sdk android:minSdkVersion="18"
-        android:targetSdkVersion="21"/>
     <!-- Declare this required feature if you want to make the app available to BLE-capable
     devices only.  If you want to make your app available to devices that don't support BLE,
     you should omit this in the manifest.  Instead, determine BLE capability by using
