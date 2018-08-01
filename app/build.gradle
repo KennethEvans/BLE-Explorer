@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.0'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "net.kenevans.android.bleexplorer"
         minSdkVersion 18
-        targetSdkVersion 24
-        versionCode 2
-        versionName "2.0"
+        targetSdkVersion 27
+        versionCode 3
+        versionName '2.1'
     }
     buildTypes {
         release {
@@ -21,5 +21,5 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:26.0.0-alpha1'
+    implementation 'com.android.support:support-v4:27.1.1'
 }
