@@ -16,6 +16,7 @@
 <resources>
     <string name="ble_not_supported">BLE is not supported</string>
     <string name="bluetooth_not_supported">Bluetooth is not supported</string>
+    <string name="permission_coarse_location">ACCESS_COARSE_LOCATION permission must be granted to scan for Bluetooth devices.\n\nYou may have to set this manually for BLE Explorer in Settings.</string>
     <string name="label_data">Data:</string>
     <string name="label_device_address">Device address:</string>
     <string name="label_state">State:</string>
@@ -37,4 +38,11 @@
     <string name="menu_disconnect">Disconnect</string>
     <string name="menu_scan">Scan</string>
     <string name="menu_stop">Stop</string>
+
+    <!-- Utils -->
+    <string name="error">Error</string>
+    <string name="exception">Exception</string>
+    <string name="info">Info</string>
+    <string name="ok">OK</string>
+    <string name="warning">Warning</string>
 </resources>
