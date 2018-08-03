@@ -34,6 +34,9 @@ public interface IConstants {
      */
     String TAG = "BLE Explorer";
 
+    /**
+     * Code for requesting ACCESS_COARSE_LOCATION permission.
+     */
     static final int PERMISSION_ACCESS_COARSE_LOCATION = 1;
 
 }

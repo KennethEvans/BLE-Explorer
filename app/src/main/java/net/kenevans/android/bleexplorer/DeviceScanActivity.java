@@ -55,7 +55,7 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
     private boolean mScanning;
     private Handler mHandler;
     private boolean mCoarseLocationPermissionAsked = false;
-    private boolean allowScan;
+    private boolean mAllowScan;
 
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
@@ -100,10 +100,14 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
 
         // Checks if Bluetooth is supported on the device.
         if (mBluetoothAdapter == null) {
-            Toast.makeText(this, R.string.error_bluetooth_not_supported,
-                    Toast.LENGTH_LONG).show();
-            finish();
+            String msg = getString(R.string.bluetooth_not_supported);
+            Utils.errMsg(this, msg);
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+			finish();
         }
+
+        // Set result CANCELED in case the user backs out
+        setResult(Activity.RESULT_CANCELED);
     }
 
     @Override
@@ -167,11 +171,11 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
                 // COARSE_LOCATION
                 if (grantResults.length > 0 && grantResults[0] ==
                         PackageManager.PERMISSION_GRANTED) {
-                    allowScan = true;
+                    mAllowScan = true;
                     startScan();
                 } else if (grantResults.length > 0 && grantResults[0] ==
                         PackageManager.PERMISSION_DENIED) {
-                    allowScan = false;
+                    mAllowScan = false;
                 }
                 break;
         }
@@ -236,7 +240,7 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
                 Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
-            allowScan = false;
+            mAllowScan = false;
             if (!mCoarseLocationPermissionAsked) {
                 Log.d(TAG, "startScan: requestPermission");
                 mCoarseLocationPermissionAsked = true;
@@ -252,10 +256,10 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
                 }
             }
         } else {
-            allowScan = true;
+            mAllowScan = true;
         }
 
-        if (allowScan) {
+        if (mAllowScan) {
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
                 @Override
