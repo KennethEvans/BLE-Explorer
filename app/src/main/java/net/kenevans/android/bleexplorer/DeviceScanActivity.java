@@ -16,10 +16,9 @@
 
 package net.kenevans.android.bleexplorer;
 
-import java.util.ArrayList;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
@@ -27,11 +26,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -45,6 +42,8 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -65,7 +64,10 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActionBar().setTitle(R.string.title_devices);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(R.string.title_devices);
+        }
         mHandler = new Handler();
 
         // Use this check to determine whether BLE is supported on the device.
@@ -125,10 +127,10 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
         switch (item.getItemId()) {
             case R.id.menu_scan:
                 mLeDeviceListAdapter.clear();
-                scanLeDevice(true);
+                startScan();
                 break;
             case R.id.menu_stop:
-                scanLeDevice(false);
+                endScan();
                 break;
         }
         return true;
@@ -153,7 +155,7 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
         if (mBluetoothAdapter.isEnabled()) {
             mLeDeviceListAdapter = new LeDeviceListAdapter();
             setListAdapter(mLeDeviceListAdapter);
-            scanLeDevice(true);
+            startScan();
         }
     }
 
@@ -166,7 +168,7 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
                 if (grantResults.length > 0 && grantResults[0] ==
                         PackageManager.PERMISSION_GRANTED) {
                     allowScan = true;
-                    scanLeDevice(true);
+                    startScan();
                 } else if (grantResults.length > 0 && grantResults[0] ==
                         PackageManager.PERMISSION_DENIED) {
                     allowScan = false;
@@ -192,7 +194,7 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
         super.onPause();
         Log.d(TAG, "onPause: mScanning=" + mScanning);
         if (mBluetoothAdapter.isEnabled()) {
-            scanLeDevice(false);
+            endScan();
         }
         if (mLeDeviceListAdapter != null) {
             mLeDeviceListAdapter.clear();
@@ -216,19 +218,19 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
         startActivity(intent);
     }
 
-    private void scanLeDevice(final boolean start) {
-        Log.d(TAG, "scanLeDevice: start=" + start);
+    private void endScan() {
+        Log.d(TAG, "endScan");
         // Stop
-        if (!start) {
-            if (mScanning == true) {
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            }
-            mScanning = false;
-            invalidateOptionsMenu();
-            return;
+        if (mScanning) {
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
+        mScanning = false;
+        invalidateOptionsMenu();
+    }
 
-        // Start
+    private void startScan() {
+        Log.d(TAG, "startScan");
+
         // Check for coarse location permission
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -236,14 +238,14 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
             // Permission is not granted
             allowScan = false;
             if (!mCoarseLocationPermissionAsked) {
-                Log.d(TAG, "scanLeDevice: requestPermission");
+                Log.d(TAG, "startScan: requestPermission");
                 mCoarseLocationPermissionAsked = true;
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission
                                 .ACCESS_COARSE_LOCATION},
                         PERMISSION_ACCESS_COARSE_LOCATION);
             } else {
-                Log.d(TAG, "scanLeDevice: infoMsg");
+                Log.d(TAG, "startScan: infoMsg");
                 String msg = getString(R.string.permission_coarse_location);
                 if (mCoarseLocationPermissionAsked) {
                     Utils.infoMsg(this, msg);
