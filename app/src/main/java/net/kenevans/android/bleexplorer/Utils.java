@@ -21,9 +21,9 @@
 
 package net.kenevans.android.bleexplorer;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -39,7 +39,7 @@ public class Utils implements IConstants {
      * @param msg     The dialog message.
      */
     @SuppressWarnings("unused")
-    public static void alert(Context context, String title, String msg) {
+    private static void alert(Context context, String title, String msg) {
         try {
             AlertDialog alertDialog = new AlertDialog.Builder(context)
                     .setTitle(title)
@@ -65,7 +65,7 @@ public class Utils implements IConstants {
      * @param msg     The dialog message.
      */
     @SuppressWarnings("unused")
-    public static void errMsg(Context context, String msg) {
+    static void errMsg(Context context, String msg) {
         Log.e(TAG, getContextTag(context) + msg);
         alert(context, context.getText(R.string.error).toString(), msg);
     }
@@ -89,7 +89,7 @@ public class Utils implements IConstants {
      * @param msg     The dialog message.
      */
     @SuppressWarnings("unused")
-    public static void infoMsg(Context context, String msg) {
+    static void infoMsg(Context context, String msg) {
         Log.i(TAG, getContextTag(context) + msg);
         alert(context, context.getText(R.string.info).toString(), msg);
     }
@@ -119,7 +119,7 @@ public class Utils implements IConstants {
      * @return The context tag.
      */
     @SuppressWarnings("unused")
-    public static String getContextTag(Context context) {
+    private static String getContextTag(Context context) {
         if (context == null) {
             return "<???>: ";
         }
