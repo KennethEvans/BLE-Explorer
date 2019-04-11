@@ -18,9 +18,7 @@ package net.kenevans.android.bleexplorer;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -32,12 +30,15 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -49,13 +50,14 @@ import java.util.ArrayList;
  * Activity for scanning and displaying available Bluetooth LE devices.
  */
 @SuppressLint("InflateParams")
-public class DeviceScanActivity extends ListActivity implements IConstants {
+public class DeviceScanActivity extends AppCompatActivity implements IConstants {
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     private Handler mHandler;
     private boolean mCoarseLocationPermissionAsked = false;
     private boolean mAllowScan;
+    private ListView mListView;
 
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
@@ -64,19 +66,30 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(R.string.title_devices);
+            actionBar.setDisplayHomeAsUpEnabled(false);
         }
+        setContentView(R.layout.list_view);
         mHandler = new Handler();
+        mListView = findViewById(R.id.mainListView);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                onListItemClick(mListView, view, position, id);
+            }
+        });
 
         // Use this check to determine whether BLE is supported on the device.
         // Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG)
-                    .show();
+            String msg = getString(R.string.ble_not_supported);
+            Utils.errMsg(this, msg);
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
             finish();
         }
 
@@ -103,7 +116,8 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
             String msg = getString(R.string.bluetooth_not_supported);
             Utils.errMsg(this, msg);
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-			finish();
+            finish();
+            return;
         }
 
         // Set result CANCELED in case the user backs out
@@ -158,7 +172,7 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
         // Initializes list view adapter.
         if (mBluetoothAdapter.isEnabled()) {
             mLeDeviceListAdapter = new LeDeviceListAdapter();
-            setListAdapter(mLeDeviceListAdapter);
+            mListView.setAdapter(mLeDeviceListAdapter);
             startScan();
         }
     }
@@ -205,7 +219,6 @@ public class DeviceScanActivity extends ListActivity implements IConstants {
         }
     }
 
-    @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
         if (device == null)

@@ -6,8 +6,8 @@ android {
         applicationId "net.kenevans.android.bleexplorer"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 3
-        versionName '2.1'
+        versionCode 4
+        versionName '2.2.0'
     }
     buildTypes {
         release {
@@ -21,4 +21,5 @@ android {
 
 dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
 }

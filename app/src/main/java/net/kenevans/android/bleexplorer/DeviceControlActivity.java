@@ -31,6 +31,8 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,7 +47,7 @@ import android.widget.TextView;
  * device. The Activity communicates with {@code BluetoothLeService}, which in
  * turn interacts with the Bluetooth LE API.
  */
-public class DeviceControlActivity extends Activity {
+public class DeviceControlActivity extends AppCompatActivity {
 	private final static String TAG = DeviceControlActivity.class
 			.getSimpleName();
 
@@ -68,6 +70,11 @@ public class DeviceControlActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setTitle(R.string.title_devices);
+			actionBar.setDisplayHomeAsUpEnabled(false);
+		}
 		setContentView(R.layout.gatt_services_characteristics);
 
 		final Intent intent = getIntent();
@@ -76,7 +83,7 @@ public class DeviceControlActivity extends Activity {
 
 		// Sets up UI references.
 		((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
-		mGattServicesList = (ExpandableListView) findViewById(R.id.gatt_services_list);
+		mGattServicesList = findViewById(R.id.gatt_services_list);
 		mGattServicesList
 				.setOnChildClickListener(servicesListChildClickListner);
 		mGattServicesList
@@ -98,12 +105,10 @@ public class DeviceControlActivity extends Activity {
 						return false;
 					}
 				});
-		mConnectionState = (TextView) findViewById(R.id.connection_state);
-		mDataField = (TextView) findViewById(R.id.data_value);
+		mConnectionState = findViewById(R.id.connection_state);
+		mDataField = findViewById(R.id.data_value);
 		// mDataField.setVisibility(View.GONE);
 
-		getActionBar().setTitle(mDeviceName);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
 		Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
 		bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 	}
