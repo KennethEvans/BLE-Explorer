@@ -16,9 +16,6 @@
 
 package net.kenevans.android.bleexplorer;
 
-import java.util.List;
-import java.util.UUID;
-
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -35,13 +32,16 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.List;
+import java.util.UUID;
+
 /**
  * Service for managing connection and data communication with a GATT server
  * hosted on a given Bluetooth LE device.
  */
 public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
-    private static final boolean DEBUG_DATA = false;
+    private static final boolean DEBUG_DATA = true;
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -54,15 +54,15 @@ public class BluetoothLeService extends Service {
     // private static final int STATE_CONNECTED = 2;
 
     public final static String ACTION_GATT_CONNECTED = "net.kenevans.android" +
-			".bleexplorer.ACTION_GATT_CONNECTED";
+            ".bleexplorer.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED = "net.kenevans" +
-			".android.bleexplorer.ACTION_GATT_DISCONNECTED";
+            ".android.bleexplorer.ACTION_GATT_DISCONNECTED";
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "net" +
-			".kenevans.android.bleexplorer.ACTION_GATT_SERVICES_DISCOVERED";
+            ".kenevans.android.bleexplorer.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "net.kenevans.android" +
-			".bleexplorer.ACTION_DATA_AVAILABLE";
+            ".bleexplorer.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA = "net.kenevans.android.bleexplorer" +
-			".EXTRA_DATA";
+            ".EXTRA_DATA";
 
     public final static UUID UUID_HEART_RATE_MEASUREMENT = UUID
             .fromString(GattAttributes.HEART_RATE_MEASUREMENT);
@@ -76,53 +76,57 @@ public class BluetoothLeService extends Service {
     // Implements callback methods for GATT events that the app cares about. For
     // example, connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new
-			BluetoothGattCallback() {
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status,
-                                            int newState) {
-            String intentAction;
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                intentAction = ACTION_GATT_CONNECTED;
-                mConnectionState = BluetoothProfile.STATE_CONNECTED;
-                broadcastUpdate(intentAction);
-                Log.i(TAG, "Connected to GATT server.");
-                // Attempts to discover services after successful connection.
-                Log.i(TAG, "Attempting to start service discovery:"
-                        + mBluetoothGatt.discoverServices());
+            BluetoothGattCallback() {
+                @Override
+                public void onConnectionStateChange(BluetoothGatt gatt,
+                                                    int status,
+                                                    int newState) {
+                    String intentAction;
+                    if (newState == BluetoothProfile.STATE_CONNECTED) {
+                        intentAction = ACTION_GATT_CONNECTED;
+                        mConnectionState = BluetoothProfile.STATE_CONNECTED;
+                        broadcastUpdate(intentAction);
+                        Log.i(TAG, "Connected to GATT server.");
+                        // Attempts to discover services after successful
+                        // connection.
+                        Log.i(TAG, "Attempting to start service discovery:"
+                                + mBluetoothGatt.discoverServices());
 
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                intentAction = ACTION_GATT_DISCONNECTED;
-                mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
-                Log.i(TAG, "Disconnected from GATT server.");
-                broadcastUpdate(intentAction);
-            }
-        }
+                    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                        intentAction = ACTION_GATT_DISCONNECTED;
+                        mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
+                        Log.i(TAG, "Disconnected from GATT server.");
+                        broadcastUpdate(intentAction);
+                    }
+                }
 
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
-            } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
-            }
-        }
+                @Override
+                public void onServicesDiscovered(BluetoothGatt gatt,
+                                                 int status) {
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+                    } else {
+                        Log.w(TAG, "onServicesDiscovered received: " + status);
+                    }
+                }
 
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic
-												 characteristic, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-            }
-        }
+                @Override
+                public void onCharacteristicRead(BluetoothGatt gatt,
+                                                 BluetoothGattCharacteristic
+                                                         characteristic,
+                                                 int status) {
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                    }
+                }
 
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic
-													characteristic) {
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-        }
-    };
+                @Override
+                public void onCharacteristicChanged(BluetoothGatt gatt,
+                                                    BluetoothGattCharacteristic
+                                                            characteristic) {
+                    broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                }
+            };
 
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
@@ -131,28 +135,33 @@ public class BluetoothLeService extends Service {
 
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic
-										 characteristic) {
+                                         characteristic) {
         final Intent intent = new Intent(action);
 
         // This is special handling for the Heart Rate Measurement profile. Data
         // parsing is
         // carried out as per profile specifications:
         // http://developer.bluetooth
-		// .org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org
-		// .bluetooth.characteristic.heart_rate_measurement.xml
+        // .org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org
+        // .bluetooth.characteristic.heart_rate_measurement.xml
         if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
             String string = "";
-            int flag = characteristic.getProperties();
+            int flag =
+                    characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+//            Log.d(TAG, "Flag " + String.format("%02x", flag)
+//                    + " EE: flag & 0x08=" + (flag & 0x08)
+//                    + " RR: flag & 0x10=" + (flag & 0x10)
+//            );
             int format;
             int offset = 1;
             if ((flag & 0x01) != 0) {
                 format = BluetoothGattCharacteristic.FORMAT_UINT16;
-                Log.d(TAG, "Heart rate format UINT16.");
+//                Log.d(TAG, "Heart rate format UINT16.");
                 offset += 2;
             } else {
                 format = BluetoothGattCharacteristic.FORMAT_UINT8;
                 offset += 1;
-                Log.d(TAG, "Heart rate format UINT8.");
+//                Log.d(TAG, "Heart rate format UINT8.");
             }
             int iVal = characteristic.getIntValue(format, 1);
             string += "Heart Rate: " + iVal;
@@ -172,9 +181,9 @@ public class BluetoothLeService extends Service {
             }
             // Energy Expended
             if ((flag & 0x08) != 0) {
-                offset += 2;
                 iVal = characteristic.getIntValue(
                         BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+                offset += 2;
                 string += "\nEnergy Expended: " + iVal;
             } else {
                 string += "\nEnergy Expended: NA";
@@ -210,14 +219,14 @@ public class BluetoothLeService extends Service {
                     string += "\n" + stringBuilder.toString();
                 }
             }
-            Log.d(TAG, String.format("Received heart rate: %d", iVal));
-            intent.putExtra(EXTRA_DATA, String.valueOf(string));
+//            Log.d(TAG, String.format("Received heart rate: %d", iVal));
+            intent.putExtra(EXTRA_DATA, string);
         } else if (UUID_BATTERY_LEVEL.equals(characteristic.getUuid())) {
             final int iVal = characteristic.getIntValue(
                     BluetoothGattCharacteristic.FORMAT_UINT8, 0);
             Log.d(TAG, String.format("Received battery level: %d", iVal));
             intent.putExtra(EXTRA_DATA,
-                    String.valueOf("Battery Level: " + iVal));
+                    "Battery Level: " + iVal);
         } else if (UUID_CUSTOM_MEASUREMENT.equals(characteristic.getUuid())) {
             String string = "";
             int offset = 0;
@@ -254,7 +263,7 @@ public class BluetoothLeService extends Service {
                     string += "\n" + stringBuilder.toString();
                 }
             }
-            intent.putExtra(EXTRA_DATA, String.valueOf(string));
+            intent.putExtra(EXTRA_DATA, string);
         } else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
@@ -322,7 +331,7 @@ public class BluetoothLeService extends Service {
         // BluetoothManager.
         if (mBluetoothManager == null) {
             mBluetoothManager = (BluetoothManager) getSystemService(Context
-					.BLUETOOTH_SERVICE);
+                    .BLUETOOTH_SERVICE);
             if (mBluetoothManager == null) {
                 Log.e(TAG, "Unable to initialize BluetoothManager.");
                 return false;
@@ -356,8 +365,7 @@ public class BluetoothLeService extends Service {
         }
 
         // Previously connected device. Try to reconnect.
-        if (mBluetoothDeviceAddress != null
-                && address.equals(mBluetoothDeviceAddress)
+        if (address.equals(mBluetoothDeviceAddress)
                 && mBluetoothGatt != null) {
             Log.d(TAG,
                     "Trying to use an existing mBluetoothGatt for connection.");
@@ -476,7 +484,7 @@ public class BluetoothLeService extends Service {
 
     /**
      * Retrieves a list of supported GATT services on the connected device. This
-     *
+     * <p>
      * should be invoked only after {@code BluetoothGatt#discoverServices()}
      * completes successfully.
      *
