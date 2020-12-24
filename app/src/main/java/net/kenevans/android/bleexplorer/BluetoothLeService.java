@@ -116,7 +116,7 @@ public class BluetoothLeService extends Service {
                                                          characteristic,
                                                  int status) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
-                        broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                        broadcastUpdate(characteristic);
                     }
                 }
 
@@ -124,7 +124,7 @@ public class BluetoothLeService extends Service {
                 public void onCharacteristicChanged(BluetoothGatt gatt,
                                                     BluetoothGattCharacteristic
                                                             characteristic) {
-                    broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                    broadcastUpdate(characteristic);
                 }
             };
 
@@ -133,10 +133,10 @@ public class BluetoothLeService extends Service {
         sendBroadcast(intent);
     }
 
-    private void broadcastUpdate(final String action,
-                                 final BluetoothGattCharacteristic
+    private void broadcastUpdate(final BluetoothGattCharacteristic
                                          characteristic) {
-        final Intent intent = new Intent(action);
+        final Intent intent =
+                new Intent(BluetoothLeService.ACTION_DATA_AVAILABLE);
 
         // This is special handling for the Heart Rate Measurement profile. Data
         // parsing is
@@ -166,7 +166,7 @@ public class BluetoothLeService extends Service {
             int iVal = characteristic.getIntValue(format, 1);
             string += "Heart Rate: " + iVal;
             // Sensor Contact
-            int sensor = (flag >> 1) & 0x11;
+            int sensor = (flag >> 1) & 0x3;
             switch (sensor) {
                 case 0:
                 case 1:

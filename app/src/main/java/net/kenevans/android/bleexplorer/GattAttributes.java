@@ -7,8 +7,7 @@ import java.util.HashMap;
  * demonstration purposes.
  */
 public class GattAttributes {
-    private static HashMap<String, String> attributes = new HashMap<String,
-			String>();
+    private static final HashMap<String, String> attributes = new HashMap<>();
     public static final String BASE_UUID = "00000000-0000-1000-8000" +
 			"-00805f9b34fb";
     public static final String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000" +

@@ -26,8 +26,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,6 +37,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect,
@@ -59,7 +60,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     private String mDeviceAddress;
     private ExpandableListView mGattServicesList;
     private BluetoothLeService mBluetoothLeService;
-    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
+    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<>();
     private boolean mConnected = false;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
 
@@ -84,7 +85,7 @@ public class DeviceControlActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
         mGattServicesList = findViewById(R.id.gatt_services_list);
         mGattServicesList
-                .setOnChildClickListener(servicesListChildClickListner);
+                .setOnChildClickListener(servicesListChildClickListener);
         mGattServicesList
                 .setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
                     @Override
@@ -151,16 +152,16 @@ public class DeviceControlActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_connect:
-                mBluetoothLeService.connect(mDeviceAddress);
-                return true;
-            case R.id.menu_disconnect:
-                mBluetoothLeService.disconnect();
-                return true;
-            case android.R.id.home:
-                onBackPressed();
-                return true;
+        int id = item.getItemId();
+        if (id == R.id.menu_connect) {
+            mBluetoothLeService.connect(mDeviceAddress);
+            return true;
+        } else if (id == R.id.menu_disconnect) {
+            mBluetoothLeService.disconnect();
+            return true;
+        } else if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -196,16 +197,15 @@ public class DeviceControlActivity extends AppCompatActivity {
         String unknownCharaString = getResources().getString(
                 R.string.unknown_characteristic);
         ArrayList<HashMap<String, String>> gattServiceData =
-                new ArrayList<HashMap<String, String>>();
+                new ArrayList<>();
         ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData
-                = new ArrayList<ArrayList<HashMap<String, String>>>();
+                = new ArrayList<>();
         mGattCharacteristics =
-                new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
+                new ArrayList<>();
 
         // Loops through available GATT Services.
         for (BluetoothGattService gattService : gattServices) {
-            HashMap<String, String> currentServiceData = new HashMap<String,
-                    String>();
+            HashMap<String, String> currentServiceData = new HashMap<>();
             uuid = gattService.getUuid().toString();
             currentServiceData.put(LIST_NAME,
                     GattAttributes.lookup(uuid, unknownServiceString));
@@ -213,25 +213,24 @@ public class DeviceControlActivity extends AppCompatActivity {
             gattServiceData.add(currentServiceData);
 
             ArrayList<HashMap<String, String>> gattCharacteristicGroupData =
-                    new ArrayList<HashMap<String, String>>();
+                    new ArrayList<>();
             List<BluetoothGattCharacteristic> gattCharacteristics = gattService
                     .getCharacteristics();
-            ArrayList<BluetoothGattCharacteristic> charas =
-                    new ArrayList<BluetoothGattCharacteristic>();
+            ArrayList<BluetoothGattCharacteristic> characteristics =
+                    new ArrayList<>();
 
             // Loops through available Characteristics.
             for (BluetoothGattCharacteristic gattCharacteristic :
                     gattCharacteristics) {
-                charas.add(gattCharacteristic);
-                HashMap<String, String> currentCharaData = new HashMap<String
-                        , String>();
+                characteristics.add(gattCharacteristic);
+                HashMap<String, String> currentCharaData = new HashMap<>();
                 uuid = gattCharacteristic.getUuid().toString();
                 currentCharaData.put(LIST_NAME,
                         GattAttributes.lookup(uuid, unknownCharaString));
                 currentCharaData.put(LIST_UUID, uuid);
                 gattCharacteristicGroupData.add(currentCharaData);
             }
-            mGattCharacteristics.add(charas);
+            mGattCharacteristics.add(characteristics);
             gattCharacteristicData.add(gattCharacteristicGroupData);
         }
 
@@ -240,11 +239,13 @@ public class DeviceControlActivity extends AppCompatActivity {
                         this, gattServiceData,
                         android.R.layout.simple_expandable_list_item_2,
                         new String[]{
-                        LIST_NAME, LIST_UUID}, new int[]{android.R.id.text1,
+                                LIST_NAME, LIST_UUID},
+                        new int[]{android.R.id.text1,
                         android.R.id.text2}, gattCharacteristicData,
                         android.R.layout.simple_expandable_list_item_2,
                         new String[]{
-                        LIST_NAME, LIST_UUID}, new int[]{android.R.id.text1,
+                                LIST_NAME, LIST_UUID},
+                        new int[]{android.R.id.text1,
                         android.R.id.text2});
         mGattServicesList.setAdapter(gattServiceAdapter);
     }
@@ -267,7 +268,7 @@ public class DeviceControlActivity extends AppCompatActivity {
                                                IBinder service) {
                     mBluetoothLeService =
                             ((BluetoothLeService.LocalBinder) service)
-                            .getService();
+                                    .getService();
                     if (!mBluetoothLeService.initialize()) {
                         Log.e(TAG, "Unable to initialize Bluetooth");
                         finish();
@@ -326,7 +327,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     // http://d.android.com/reference/android/bluetooth/BluetoothGatt.html for
     // the complete
     // list of supported characteristic features.
-    private final ExpandableListView.OnChildClickListener servicesListChildClickListner = new ExpandableListView.OnChildClickListener() {
+    private final ExpandableListView.OnChildClickListener servicesListChildClickListener = new ExpandableListView.OnChildClickListener() {
         @Override
         public boolean onChildClick(ExpandableListView parent, View v,
                                     int groupPosition, int childPosition,
@@ -335,7 +336,7 @@ public class DeviceControlActivity extends AppCompatActivity {
                 // mDataField.setVisibility(View.VISIBLE);
                 final BluetoothGattCharacteristic characteristic =
                         mGattCharacteristics
-                        .get(groupPosition).get(childPosition);
+                                .get(groupPosition).get(childPosition);
                 // Set the data field to pending
                 mDataField.setText(GattAttributes.lookup(
                         characteristic.getUuid().toString(),

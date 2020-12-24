@@ -22,17 +22,14 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.MenuItemCompat;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,6 +43,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -84,8 +88,7 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
         });
 
         // Use this check to determine whether BLE is supported on the device.
-        // Then you can
-        // selectively disable BLE-related features.
+        // Then you can selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_BLUETOOTH_LE)) {
             String msg = getString(R.string.ble_not_supported);
@@ -131,7 +134,7 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
         if (!mScanning) {
             menu.findItem(R.id.menu_stop).setVisible(false);
             menu.findItem(R.id.menu_scan).setVisible(true);
-            MenuItemCompat.setActionView(menu.findItem(R.id.menu_refresh), null);
+            menu.findItem(R.id.menu_refresh).setActionView(null);
         } else {
             menu.findItem(R.id.menu_stop).setVisible(true);
             menu.findItem(R.id.menu_scan).setVisible(false);
@@ -143,14 +146,13 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_scan:
-                mLeDeviceListAdapter.clear();
-                startScan();
-                break;
-            case R.id.menu_stop:
-                endScan();
-                break;
+        int id = item.getItemId();
+        if (id == R.id.menu_scan) {
+            mLeDeviceListAdapter.clear();
+            startScan();
+        }
+        if (id == R.id.menu_stop) {
+            endScan();
         }
         return true;
     }
@@ -181,18 +183,16 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[]
             permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_ACCESS_COARSE_LOCATION:
-                // COARSE_LOCATION
-                if (grantResults.length > 0 && grantResults[0] ==
-                        PackageManager.PERMISSION_GRANTED) {
-                    mAllowScan = true;
-                    startScan();
-                } else if (grantResults.length > 0 && grantResults[0] ==
-                        PackageManager.PERMISSION_DENIED) {
-                    mAllowScan = false;
-                }
-                break;
+        if (requestCode == PERMISSION_ACCESS_COARSE_LOCATION) {
+            // COARSE_LOCATION
+            if (grantResults.length > 0 && grantResults[0] ==
+                    PackageManager.PERMISSION_GRANTED) {
+                mAllowScan = true;
+                startScan();
+            } else if (grantResults.length > 0 && grantResults[0] ==
+                    PackageManager.PERMISSION_DENIED) {
+                mAllowScan = false;
+            }
         }
     }
 
@@ -230,7 +230,7 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
         intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS,
                 device.getAddress());
         if (mScanning) {
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
             mScanning = false;
         }
         startActivity(intent);
@@ -240,7 +240,7 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
         Log.d(TAG, "endScan");
         // Stop
         if (mScanning) {
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
         }
         mScanning = false;
         invalidateOptionsMenu();
@@ -279,13 +279,18 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
                 @Override
                 public void run() {
                     mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
                     invalidateOptionsMenu();
                 }
             }, SCAN_PERIOD);
 
             mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            mBluetoothAdapter.getBluetoothLeScanner().startScan(null,
+                    new ScanSettings.Builder()
+                            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                            .setReportDelay(1000)
+                            .build(),
+                    mLeScanCallback);
         }
         invalidateOptionsMenu();
     }
@@ -359,12 +364,14 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
     }
 
     // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback = new
-            BluetoothAdapter.LeScanCallback() {
-
+    private final ScanCallback mLeScanCallback = new
+            ScanCallback() {
                 @Override
-                public void onLeScan(final BluetoothDevice device, int rssi,
-                                     byte[] scanRecord) {
+                public void onScanResult(int callbackType, ScanResult result) {
+                    Log.d(TAG, this.getClass().getSimpleName() + ": " +
+                            "onScanResult");
+                    final BluetoothDevice device = result.getDevice();
+                    String deviceAddress = device.getAddress();
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -372,6 +379,32 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
                             mLeDeviceListAdapter.notifyDataSetChanged();
                         }
                     });
+                }
+
+                @Override
+                public void onBatchScanResults(List<ScanResult> results) {
+                    Log.d(TAG, this.getClass().getSimpleName() + ": " +
+                            "onBatchScanResults"
+                            + " nResults=" + results.size());
+                    // Results is non-null
+                    for (ScanResult result : results) {
+                        final BluetoothDevice device = result.getDevice();
+                        Log.d(TAG, "    device=" + device.getName()
+                                + " " + device.getAddress());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mLeDeviceListAdapter.addDevice(device);
+                                mLeDeviceListAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onScanFailed(int errorCode) {
+                    Log.d(TAG, this.getClass().getSimpleName() + ": " +
+                            "onScanFailed");
                 }
             };
 

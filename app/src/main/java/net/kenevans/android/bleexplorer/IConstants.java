@@ -21,10 +21,6 @@
 
 package net.kenevans.android.bleexplorer;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.UUID;
-
 /**
  * Holds constant values used by several classes in the application.
  */
