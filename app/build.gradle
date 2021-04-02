@@ -6,8 +6,8 @@ android {
         applicationId "net.kenevans.android.bleexplorer"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 5
-        versionName "2.3.0"
+        versionCode 6
+        versionName "2.3.1"
     }
     buildTypes {
         release {
