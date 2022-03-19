@@ -29,10 +29,37 @@ public interface IConstants {
      * Tag to associate with log messages.
      */
     String TAG = "BLEExplorer";
+    /**
+     * Name of the package for this application.
+     */
+    String PACKAGE_NAME = "net.kenevans.android.bleexplorer";
 
+    /**
+     * Default scan period for device scan.
+     */
+    long DEVICE_SCAN_PERIOD = 10000;
+
+    /**
+     * Request code for all permissions.
+     */
+    int REQ_ACCESS_PERMISSIONS = 1;
     /**
      * Code for requesting ACCESS_COARSE_LOCATION permission.
      */
     int PERMISSION_ACCESS_COARSE_LOCATION = 1;
+    /**
+     * The intent code for device name.
+     */
+    String DEVICE_NAME_CODE = PACKAGE_NAME + ".deviceName";
+    /**
+     * The intent code for device address.
+     */
+    String DEVICE_ADDRESS_CODE = PACKAGE_NAME
+            + "deviceAddress";
+
+    String LIST_NAME = "NAME";
+    String LIST_UUID = "UUID";
+
+
 
 }

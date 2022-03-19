@@ -47,12 +47,9 @@ import androidx.appcompat.app.AppCompatActivity;
  * device. The Activity communicates with {@code BluetoothLeService}, which in
  * turn interacts with the Bluetooth LE API.
  */
-public class DeviceControlActivity extends AppCompatActivity {
+public class DeviceControlActivity extends AppCompatActivity implements IConstants {
     private final static String TAG = DeviceControlActivity.class
             .getSimpleName();
-
-    public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
-    public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
 
     private TextView mConnectionState;
     private TextView mDataField;
@@ -63,9 +60,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<>();
     private boolean mConnected = false;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
-
-    private final String LIST_NAME = "NAME";
-    private final String LIST_UUID = "UUID";
+    private boolean mBleSupported;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,8 +73,8 @@ public class DeviceControlActivity extends AppCompatActivity {
         setContentView(R.layout.gatt_services_characteristics);
 
         final Intent intent = getIntent();
-        mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
-        mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
+        mDeviceName = intent.getStringExtra(DEVICE_NAME_CODE);
+        mDeviceAddress = intent.getStringExtra(DEVICE_ADDRESS_CODE);
 
         // Sets up UI references.
         ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
@@ -87,24 +82,19 @@ public class DeviceControlActivity extends AppCompatActivity {
         mGattServicesList
                 .setOnChildClickListener(servicesListChildClickListener);
         mGattServicesList
-                .setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-                    @Override
-                    public boolean onGroupClick(ExpandableListView parent,
-                                                View v, int groupPosition,
-                                                long id) {
-                        // Clear the data area
-                        // mDataField.setVisibility(View.GONE);
-                        mDataField.setText("");
-                        // Cancel any pending notifications
-                        if (mNotifyCharacteristic != null) {
-                            mBluetoothLeService.setCharacteristicNotification(
-                                    mNotifyCharacteristic, false);
-                        }
-                        mNotifyCharacteristic = null;
-                        // Return false so it will continue to be handled as if
-                        // there were no listener
-                        return false;
+                .setOnGroupClickListener((parent, v, groupPosition, id) -> {
+                    // Clear the data area
+                    // mDataField.setVisibility(View.GONE);
+                    mDataField.setText("");
+                    // Cancel any pending notifications
+                    if (mNotifyCharacteristic != null) {
+                        mBluetoothLeService.setCharacteristicNotification(
+                                mNotifyCharacteristic, false);
                     }
+                    mNotifyCharacteristic = null;
+                    // Return false so it will continue to be handled as if
+                    // there were no listener
+                    return false;
                 });
         mConnectionState = findViewById(R.id.connection_state);
         mDataField = findViewById(R.id.data_value);
@@ -147,6 +137,13 @@ public class DeviceControlActivity extends AppCompatActivity {
             menu.findItem(R.id.menu_connect).setVisible(true);
             menu.findItem(R.id.menu_disconnect).setVisible(false);
         }
+        // Capture global exceptions
+        Thread.setDefaultUncaughtExceptionHandler((paramThread,
+                                                   paramThrowable) -> {
+            Log.e(TAG, "Unexpected exception: ", paramThrowable);
+            // Any non-zero exit code
+            System.exit(2);
+        });
         return true;
     }
 
@@ -167,12 +164,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     }
 
     private void updateConnectionState(final int resourceId) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mConnectionState.setText(resourceId);
-            }
-        });
+        runOnUiThread(() -> mConnectionState.setText(resourceId));
     }
 
     private void displayData(String data) {
@@ -241,12 +233,12 @@ public class DeviceControlActivity extends AppCompatActivity {
                         new String[]{
                                 LIST_NAME, LIST_UUID},
                         new int[]{android.R.id.text1,
-                        android.R.id.text2}, gattCharacteristicData,
+                                android.R.id.text2}, gattCharacteristicData,
                         android.R.layout.simple_expandable_list_item_2,
                         new String[]{
                                 LIST_NAME, LIST_UUID},
                         new int[]{android.R.id.text1,
-                        android.R.id.text2});
+                                android.R.id.text2});
         mGattServicesList.setAdapter(gattServiceAdapter);
     }
 

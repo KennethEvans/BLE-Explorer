@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "net.kenevans.android.bleexplorer"
-        minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 6
-        versionName "2.3.1"
+        minSdkVersion 23
+        targetSdkVersion 31
+        versionCode 7
+        versionName "2.4.0"
     }
     buildTypes {
         release {
@@ -21,5 +21,5 @@ android {
 
 dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
 }

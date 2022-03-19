@@ -6,27 +6,55 @@
     devices only.  If you want to make your app available to devices that don't support BLE,
     you should omit this in the manifest.  Instead, determine BLE capability by using
     PackageManager.hasSystemFeature(FEATURE_BLUETOOTH_LE) -->
-    <uses-feature android:name="android.hardware.bluetooth_le"
-        android:required="true"/>
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
 
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- For below Android 12 -->
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION"
+        android:maxSdkVersion="30"
+        android:targetSdkVersion="31" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30"
+        android:targetSdkVersion="31" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30"
+        android:targetSdkVersion="31" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30"
+        android:targetSdkVersion="31" />
+    <!-- For Android 12 and above -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_CONNECT"
+        android:minSdkVersion="31"
+        android:targetSdkVersion="31" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:minSdkVersion="31"
+        android:usesPermissionFlags="neverForLocation" />
 
-    <application android:label="@string/app_name"
+    <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat.Light">
-        <activity android:name="net.kenevans.android.bleexplorer.DeviceScanActivity"
-            android:label="@string/app_name">
+        <activity
+            android:name="net.kenevans.android.bleexplorer.DeviceScanActivity"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="net.kenevans.android.bleexplorer.DeviceControlActivity"/>
-        <service android:name="net.kenevans.android.bleexplorer.BluetoothLeService"
-            android:enabled="true"/>
+        <activity android:name="net.kenevans.android.bleexplorer.DeviceControlActivity" />
+
+        <service
+            android:name="net.kenevans.android.bleexplorer.BluetoothLeService"
+            android:enabled="true" />
     </application>
 
 </manifest>

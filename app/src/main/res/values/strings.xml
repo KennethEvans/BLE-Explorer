@@ -2,9 +2,10 @@
 <resources>
     <string name="ble_not_supported">BLE is not supported</string>
     <string name="bluetooth_not_supported">Bluetooth is not supported</string>
-    <string name="permission_coarse_location">Scanning disabled
-        \n\nACCESS_COARSE_LOCATION permission must be granted to scan for Bluetooth devices.
+    <string name="permission_location">Scanning disabled
+        \n\nACCESS_FINE_LOCATION permission must be granted to scan for Bluetooth devices.
         \n\nYou may have to grant this manually for BLE Explorer in Settings.</string>
+    <string name="permission_not_granted">All of the necessary permissions for this application to work properly have not been granted. You can change the permissions in Settings | apps.</string>
     <string name="label_data">Data:</string>
     <string name="label_device_address">Device address:</string>
     <string name="label_state">State:</string>
