@@ -163,7 +163,7 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(!mBleSupported) return false;
+        if (!mBleSupported) return false;
         int id = item.getItemId();
         if (id == R.id.menu_scan) {
             mLeDeviceListAdapter.clear();
@@ -222,7 +222,7 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
         Log.d(TAG, this.getClass().getSimpleName() + ": onPause"
                 + " mScanning=" + mScanning);
         super.onPause();
-        if(!mBleSupported) return;
+        if (!mBleSupported) return;
         Log.d(TAG, "onPause: mScanning=" + mScanning);
         if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
             endScan();
@@ -326,7 +326,7 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
     private void endScan() {
         Log.d(TAG, this.getClass().getSimpleName()
                 + ": endScan: mScanning=" + mScanning);
-        if(!mBleSupported) return;
+        if (!mBleSupported) return;
         // Remove the timer
         mHandler.removeCallbacksAndMessages(null);
         // Stop scanning
@@ -347,7 +347,7 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
     private void startScan() {
         Log.d(TAG, this.getClass().getSimpleName()
                 + ": startScan: mScanning=" + mScanning);
-        if(!mBleSupported) return;
+        if (!mBleSupported) return;
         if (!DeviceScanActivity.isAllPermissionsGranted(this)) {
             if (!mAllPermissionsAsked) {
                 mAllPermissionsAsked = true;
@@ -457,7 +457,11 @@ public class DeviceScanActivity extends AppCompatActivity implements IConstants 
                 viewHolder.deviceAddress.setText(device.getAddress());
             } else {
                 viewHolder.deviceName.setText(R.string.unknown_device);
-                viewHolder.deviceAddress.setText("");
+                if (device.getAddress() != null) {
+                    viewHolder.deviceAddress.setText(device.getAddress());
+                } else {
+                    viewHolder.deviceAddress.setText("");
+                }
             }
             return view;
         }
